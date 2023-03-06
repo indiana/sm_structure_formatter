@@ -1,4 +1,5 @@
 import sys
+import re
 
 def main():
     print(sys.argv)
@@ -22,9 +23,15 @@ def main():
     field_str = ""
     for in_line in in_lines:
         line = in_line.strip().lower()
+        line = re.sub("\s+", " ", line)
+        line = re.sub("\s*;\s*", ";", line)
+        line = re.sub("\s*\(\s*", "(", line)
+        line = re.sub("\s*\)", ")", line)
+        line = re.sub("\s*\.\s*", ".", line)
+
         if line != "":
 
-            if line.startswith('field') or line.startswith('collection') or line.startswith('index'):
+            if line.startswith('field ') or line.startswith('collection ') or line.startswith('index '):
                 field_def = True
                 field_str = ""
             if field_def:
@@ -34,7 +41,7 @@ def main():
                 out_lines.append("\t" + field_str.strip().replace("\n", "") + "\n")
                 field_str = ""
             elif not field_def:
-                if line in ["index_defaults"] or line.startswith("table") or line.startswith("view"):
+                if line in ["index_defaults"] or line.startswith("table ") or line.startswith("view "):
                     out_lines.append("\n")
                 if field_def:
                     line = '\t' + line
@@ -44,7 +51,6 @@ def main():
 
             if ";" in line:
                 field_def = False
-                field_str = ""
 
     file = open(out_file, mode="w")
     file.writelines(out_lines)
