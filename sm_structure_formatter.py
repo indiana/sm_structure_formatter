@@ -19,21 +19,33 @@ def main():
 
     out_lines = []
     field_def = False
+    field_str = ""
     for in_line in in_lines:
         line = in_line.strip().lower()
-        if line.startswith('field'):
-            field_def = True
         if line != "":
-            if line in ["index_defaults"] or line.startswith("table") or line.startswith("view"):
-                out_lines.append("\n")
+
+            if line.startswith('field') or line.startswith('collection') or line.startswith('index'):
+                field_def = True
+                field_str = ""
             if field_def:
-                line = '\t' + line
-            out_lines.append(line + "\n")
-        if line in ["table_defaults", "index_defaults"]:
-            out_lines.append("\n")
-        if ";" in line:
-            field_Def = False
-    
+                field_str += line + " "
+
+            if field_def and ";" in line:
+                out_lines.append("\t" + field_str.strip().replace("\n", "") + "\n")
+                field_str = ""
+            elif not field_def:
+                if line in ["index_defaults"] or line.startswith("table") or line.startswith("view"):
+                    out_lines.append("\n")
+                if field_def:
+                    line = '\t' + line
+                out_lines.append(line + "\n")
+                if line in ["table_defaults", "index_defaults"]:
+                    out_lines.append("\n")
+
+            if ";" in line:
+                field_def = False
+                field_str = ""
+
     file = open(out_file, mode="w")
     file.writelines(out_lines)
     file.close()
